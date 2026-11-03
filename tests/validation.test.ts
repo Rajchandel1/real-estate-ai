@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {daySchema,timeSchema,visitIsFuture,workspaceSchema,imageSchema} from '../src/lib/validation';
+import {seedWorkspace} from '../src/lib/seed';
+import {emptyWorkspace} from '../src/lib/empty-workspace';
+import {toCSV,parseCSV} from '../src/lib/csv';
+import {validImageBytes} from '../src/lib/image-upload';
+test('uploaded files must match an allowed image signature',()=>{assert.equal(validImageBytes(new TextEncoder().encode('<script>bad</script>'),'image/jpeg'),false);assert.equal(validImageBytes(new Uint8Array([255,216,255]),'image/jpeg'),true);assert.equal(validImageBytes(new Uint8Array([137,80,78,71,13,10,26,10]),'image/png'),true)});
+test('empty agencies have no demo customer data',()=>{const w=emptyWorkspace('original-agency');assert.equal(w.broker.slug,'original-agency');assert.equal(w.properties.length+w.leads.length+w.visits.length,0);assert.equal(workspaceSchema.safeParse(w).success,true)});
+test('rejects impossible dates, invalid times and expired local slots',()=>{assert.equal(daySchema.safeParse('2026-02-30').success,false);assert.equal(timeSchema.safeParse('29:80').success,false);assert.equal(visitIsFuture('2026-10-30','15:29','Asia/Kolkata',new Date('2026-10-30T10:00:00Z')),false);assert.equal(visitIsFuture('2026-10-30','15:31','Asia/Kolkata',new Date('2026-10-30T10:00:00Z')),true)});
+test('rejects malformed properties, duplicate IDs and broken relationships',()=>{const make=()=>structuredClone(seedWorkspace());let w=make();assert.equal(workspaceSchema.safeParse(w).success,true);w.properties[0].price=-1;assert.equal(workspaceSchema.safeParse(w).success,false);w=make();w.properties.push({...w.properties[0]});assert.equal(workspaceSchema.safeParse(w).success,false);w=make();w.visits[0].leadId='unknown';assert.equal(workspaceSchema.safeParse(w).success,false);w=make();w.visits.push({...w.visits[0],id:'other'});assert.equal(workspaceSchema.safeParse(w).success,false)});
+test('blocks inline and executable image URLs',()=>{for(const url of ['javascript:alert(1)','data:image/png;base64,xxx','http://example.com/a.png'])assert.equal(imageSchema.safeParse(url).success,false);assert.equal(imageSchema.safeParse('https://example.com/a.png').success,true)});
+test('CSV exports escape delimiters and neutralize formulas',()=>{const p=structuredClone(seedWorkspace().properties[0]);p.title='=HYPERLINK("https://example.com")';p.description='Line one,\n"line two"';const rows=parseCSV(toCSV([p]));assert.ok(rows[1][0].startsWith("'="));assert.equal(rows[1][11],p.description)});

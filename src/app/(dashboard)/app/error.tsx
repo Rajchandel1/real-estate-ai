@@ -1,0 +1,1 @@
+'use client';export default function ErrorView({reset}:{error:Error;reset:()=>void}){return <main className="error-screen"><h2>Unable to load this section</h2><p>Other sections are unaffected. Retry this request.</p><button className="btn" onClick={reset}>Try again</button></main>}

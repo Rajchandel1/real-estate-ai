@@ -1,0 +1,2 @@
+'use client';
+export default function AppError({reset}:{error:Error;reset:()=>void}){return <main className="auth-page"><section className="auth-card" role="alert"><h1>Could not open the app</h1><p>Please retry. If this continues, check that the server and database connection are configured.</p><button className="btn" onClick={reset}>Try again</button><p><a href="/login">Back to sign in</a></p></section></main>}

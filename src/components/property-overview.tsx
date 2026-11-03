@@ -1,0 +1,7 @@
+import type {Property} from '@/lib/types';
+import {currency} from '@/lib/types';
+export function PropertyOverview({property:p,internal=false}:{property:Property;internal?:boolean}){
+ const fields:[string,string|number|undefined][]=[['Purpose',p.purpose==='rent'?'For rent':'For sale'],['Property type',p.type],['Price',p.price>0?currency(p):'Not provided'],['Neighbourhood',p.location],['City',p.city],['Built-up / listed area',p.sqft?`${p.sqft} sqft`:undefined],['Carpet area',p.carpetArea?`${p.carpetArea} sqft`:undefined],['Bedrooms',p.bhk],['Bathrooms',p.baths],['Furnishing',p.furnishing],['Society / project',p.societyName],['Floor number',p.floorNumber],['Total floors',p.totalFloors]];
+ if(internal)fields.push(['Listing status',p.status],['Featured',p.featured?'Yes':'No'],['Created',p.createdAt?new Date(p.createdAt).toLocaleDateString('en-IN'):'On publish']);
+ return <div className="property-overview"><dl className="property-facts">{fields.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value===undefined||value===''?'Not provided':value}</dd></div>)}</dl><section><h3>Description</h3><p className="preserve-lines">{p.description||'Not provided'}</p></section><section><h3>Amenities</h3>{p.amenities.length?<div className="detail-chips">{p.amenities.map((a,i)=><span key={i}>{a}</span>)}</div>:<p className="muted">No amenities added</p>}</section><section><h3>Listing photo</h3>{p.image?<img className="property-review-image" src={p.image} alt={p.title}/>:<p className="muted">No photo uploaded</p>}</section></div>;
+}

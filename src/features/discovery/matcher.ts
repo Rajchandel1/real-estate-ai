@@ -1,0 +1,3 @@
+import type {Property,Purpose,PropertyType} from '@/lib/types';
+export type Requirements={purpose?:Purpose;type?:PropertyType|'any';maxPrice?:number;area?:string;bhk?:number};
+export function matchProperties(properties:Property[],preferences:Requirements){const base=properties.filter(p=>p.status==='Active'&&(!preferences.purpose||p.purpose===preferences.purpose));return base.map(p=>({property:p,score:(preferences.type&&preferences.type!=='any'&&p.type===preferences.type?4:0)+(preferences.area&&p.location.toLowerCase().includes(preferences.area.toLowerCase())?3:0)+(preferences.bhk&&p.bhk===preferences.bhk?2:0)+(preferences.maxPrice&&p.price<=preferences.maxPrice?3:0)})).sort((a,b)=>b.score-a.score).map(x=>x.property)}

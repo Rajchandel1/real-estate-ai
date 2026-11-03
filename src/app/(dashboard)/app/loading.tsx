@@ -1,0 +1,1 @@
+export default function Loading(){return <div className="page-skeleton" aria-busy="true"><div className="skeleton sk-title"/><div className="skeleton sk-banner"/><div className="sk-row">{[0,1,2,3].map(i=><div className="skeleton sk-card" key={i}/>)}</div><div className="skeleton sk-table"/></div>}
